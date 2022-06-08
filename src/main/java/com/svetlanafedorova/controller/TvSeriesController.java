@@ -1,5 +1,6 @@
 package com.svetlanafedorova.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -13,6 +14,7 @@ import com.svetlanafedorova.model.Episode;
 import com.svetlanafedorova.model.TvSeries;
 import com.svetlanafedorova.proxy.EpisodeProxy;
 import com.svetlanafedorova.proxy.TvSeriesProxy;
+import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 @Path("/tvseries")
@@ -27,9 +29,14 @@ public class TvSeriesController {
     @GET
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @Fallback(fallbackMethod = "fallbackGet")
     public Response get(@QueryParam("title") String title) {
         TvSeries movie = tvSeriesProxy.get(title);
         List<Episode> episodes = episodeProxy.get(movie.getId());
         return Response.ok(episodes).build();
+    }
+
+    private Response fallbackGet(String title) {
+        return Response.ok(new ArrayList<>()).build();
     }
 }
